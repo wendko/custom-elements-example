@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Custom Elements</title>
+    <style>
+    
+    :root {
+        --slot-theme: #d77f8e;
+        --extending-theme: #4e4ebc;
+        --custom-theme: #6ab96a;
+    }
+
+    body {
+        font-family: fantasy;
+        background-color: #3d3c4a;
+        color: white;
+    }
+   
+    </style>
+</head>
+<body>
+    <template id="slot-template">
+        <style>
+        p {
+            background-color: var(--slot-theme);
+            padding: 5px 10px;
+            color: black; 
+            border-radius: 5px;
+        }
+        p::after {
+            content: "slot example";
+            position: absolute;
+            right: 10px;
+            font-size: 12px;
+        }
+        i {
+            margin-left: 5vw;
+        }
+        </style>
+        <p><slot name="name">No name</slot>:</p>
+        <i><slot name="greeting">No greeting</slot></i>
+    </template>
+
+    <template id="extending-template">
+        <style>
+        p {
+            background-color: var(--extending-theme);
+            color: black;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        p::after {
+            content: "extending example";
+            position: absolute;
+            right: 10px;
+            font-size: 12px;
+        }
+        pre {
+            margin-left: 5vw;
+        }
+        </style>
+        <p><slot name="name">No name</slot></p>
+        <pre><slot name="greeting">No greeting</slot></pre>
+    </template>
+
+    <template id="custom-template">
+        <style>
+        p {
+            background-color: var(--custom-theme);
+            color: black;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        p::after {
+            content: "custom example";
+            position: absolute;
+            right: 10px;
+            font-size: 12px;
+        }
+        div {
+            margin-left: 5vw;
+        }
+        </style>
+        <p class="name">No name</p>
+        <div class="greeting">No greeting</div>
+    </template>
+
+
+        
+    <slot-element>
+        <span slot="name">Woody</span>
+        <span slot="greeting">There's a snake in my boot!</span>
+    </slot-element>
+
+    <slot-element>
+        <span slot="name">Sleeping Beauty</span>
+    </slot-element>
+
+    <slot-element>
+        <span slot="name">Ariel</span>
+        <ul slot="greeting">
+            <li>Look at this stuff!</li>
+            <li>Isn't it neat?</li>
+            <li>Wouldn't you think my collection's complete?</li>
+        </ul>
+    </slot-element>
+
+
+    <div is="extending-element">
+        <span slot="name">Cinderella</span>
+        <span slot="greeting">A dream is a wish your heart makes</span>
+    </div>
+
+    <div is="extending-element">
+        <span slot="name">Rapunzel</span>
+        <span slot="greeting"><h3>And at last I see the light...</h3></span>
+    </div>
+
+    <custom-element name="Pocahontas" 
+        greeting="You think the only people who are people, are people who think and talk like you." 
+        color="orange"
+    ></custom-element>
+
+    <custom-element name="Mulan" 
+        greeting="Hope he doesn't see right through me!" 
+        color="salmon"
+    ></custom-element>
+
+    <custom-element name="Elsa" 
+        greeting="Don't let them in...don't let them see..." 
+        color="lightblue"
+    ></custom-element>
+    
+
+    <script>
+        
+    class SlotElement extends HTMLElement {
+        constructor() {
+            super();
+                
+            const tplContent = document.getElementById('slot-template').content;
+
+            const shadowRoot = this.attachShadow({mode: 'open'});
+            shadowRoot.appendChild(tplContent.cloneNode(true));
+        }
+    }
+
+    customElements.define('slot-element', SlotElement);
+
+    class ExtendingElement extends HTMLDivElement {
+        constructor() {
+            super();
+           
+            const tplContent = document.getElementById('extending-template').content;
+           
+            const shadowRoot = this.attachShadow({mode: 'open'});
+            shadowRoot.appendChild(tplContent.cloneNode(true));
+        }
+        
+    }
+
+    customElements.define('extending-element', ExtendingElement, {extends: "div"});
+
+
+    class CustomElement extends HTMLElement {
+        constructor() {
+            super();
+            const tplContent = document.getElementById('custom-template').content;
+            const shadowRoot = this.attachShadow({mode: 'open'});
+            shadowRoot.appendChild(tplContent.cloneNode(true));
+            shadowRoot.querySelector("p").innerText = this.name;
+            shadowRoot.querySelector("div").innerText = this.greeting;
+
+            const style = document.createElement('style');
+            style.textContent = `p {background-color: ${this.color}}`;
+            shadowRoot.appendChild(style);
+        }
+        
+        get name() {
+            return this.getAttribute('name');
+        }
+
+        get greeting() {
+            return this.getAttribute('greeting');
+        }
+
+        get color() {
+            return this.getAttribute("color");
+        }
+    }
+
+    customElements.define('custom-element', CustomElement);
+
+    </script>
+    
+</body>
+</html>
